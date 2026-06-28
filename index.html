@@ -2,9 +2,20 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>MandalaFocus</title>
-  <link rel="stylesheet" href="style.css?v=14" />
+
+  <!-- ホーム画面に追加（iOS / Android）で全画面アプリ風に起動 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="MandalaFocus" />
+  <meta name="theme-color" content="#0b0b0e" />
+  <link rel="apple-touch-icon" href="icon-180.png?v=15" />
+  <link rel="icon" type="image/png" href="icon-192.png?v=15" />
+  <link rel="manifest" href="manifest.webmanifest?v=15" />
+
+  <link rel="stylesheet" href="style.css?v=15" />
   <!-- p5.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
 </head>
@@ -40,10 +51,10 @@
   </div>
 
   <!-- スケッチ本体 -->
-  <script src="src/palettes.js?v=14"></script>
-  <script src="src/progression.js?v=14"></script>
-  <script src="src/interaction.js?v=14"></script>
-  <script src="src/audio.js?v=14"></script>
-  <script src="src/main.js?v=14"></script>
+  <script src="src/palettes.js?v=15"></script>
+  <script src="src/progression.js?v=15"></script>
+  <script src="src/interaction.js?v=15"></script>
+  <script src="src/audio.js?v=15"></script>
+  <script src="src/main.js?v=15"></script>
 </body>
 </html>

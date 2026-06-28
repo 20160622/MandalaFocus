@@ -24,8 +24,10 @@ canvas {
   z-index: 10;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
-  padding: 10px 14px;
+  /* セーフエリア（ノッチ／ホームバー）を避ける */
+  padding: 10px calc(14px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
   box-sizing: border-box;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
   pointer-events: none; /* バー余白はキャンバスに通す。ボタンだけ拾う */
@@ -71,11 +73,12 @@ canvas {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
   box-sizing: border-box;
   color: #fff;
   font-size: 13px;
   pointer-events: none;
+  /* セーフエリア（ノッチ／ステータスバー）を避ける */
+  padding: calc(10px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 10px calc(14px + env(safe-area-inset-left));
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
 }
 

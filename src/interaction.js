@@ -1,7 +1,7 @@
 // タップの波紋(bloom)管理 と ストローク描画バッファ(p5.Graphics)
 
-const MAX_TAPS = 16;     // シェーダーに渡せる波紋の最大数（frag 側の配列長と一致させる）
-const TAP_LIFETIME = 5000; // 波紋・開花・着彩の寿命(ms)。frag 側 TAP_LIFE と揃える
+const MAX_TAPS = 32;     // 同時に塗れる色数の上限（frag 側の配列長と一致させる）
+const TAP_LIFETIME = 12000; // 着彩の寿命(ms)。frag 側 PAINT_LIFE と揃える（塗り絵的に長め）
 
 let strokeLayer;         // ユーザーのストロークを貯める 2D バッファ（テクスチャとして渡す）
 let taps = [];           // {x, y, t} の配列（x,y はピクセル座標, t は millis）

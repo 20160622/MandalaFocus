@@ -6,8 +6,9 @@ precision highp float;
 #endif
 
 #define TAU 6.28318530718
-#define MAX_TAPS 16
-#define TAP_LIFE 5.0   // タップ効果（波紋・開花・着彩）の寿命(秒)
+#define MAX_TAPS 32
+#define TAP_LIFE 5.0     // 波紋の寿命(秒)
+#define PAINT_LIFE 12.0  // 着彩の寿命(秒)：塗り絵的に長く残し、後半でゆっくり退色
 
 varying vec2 vTexCoord;
 
@@ -287,7 +288,7 @@ void main() {
     if (i >= u_tapCount) break;
     vec3 tap = u_taps[i];
     float age = (u_time - tap.z) * 0.001;
-    if (age < 0.0 || age > TAP_LIFE) continue;
+    if (age < 0.0 || age > PAINT_LIFE) continue;
     vec2 tp = vec2(tap.x - 0.5 * res.x, 0.5 * res.y - tap.y) / res.y;
     float ta = atan(tp.y, tp.x);
     float tr = length(tp);
@@ -300,8 +301,8 @@ void main() {
     // これで線の内側にきっちり収まり、細かい要素を塗り分けられる。
     float fcTap = fieldFromP(tp);
     float bandMatch = step(abs(floor(fc * spacing) - floor(fcTap * spacing)), 0.5);
-    float grow = smoothstep(0.0, 0.25, age);       // さっと染まる
-    float life = 1.0 - age / TAP_LIFE;             // やがて退色
+    float grow = smoothstep(0.0, 0.25, age);                       // さっと染まる
+    float life = 1.0 - smoothstep(PAINT_LIFE * 0.55, PAINT_LIFE, age); // 長く残して後半で退色
     float aa = fall * grow * life * bandMatch;
     if (aa > paintA) { paintA = aa; paintCol = u_tapColor[i]; } // 最も濃い色を採用
   }

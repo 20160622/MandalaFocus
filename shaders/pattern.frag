@@ -7,6 +7,7 @@ precision highp float;
 
 #define TAU 6.28318530718
 #define MAX_TAPS 16
+#define TAP_LIFE 5.0   // タップ効果（波紋・開花・着彩）の寿命(秒)
 
 varying vec2 vTexCoord;
 
@@ -36,6 +37,7 @@ uniform float u_flame;       // 火焔光背(0/1)
 uniform float u_jewel;       // 中央の宝珠(0/1)
 
 uniform vec3  u_taps[MAX_TAPS]; // x, y(ピクセル), t(millis)
+uniform vec3  u_tapColor[MAX_TAPS]; // タップごとの着彩色(rgb)
 uniform int   u_tapCount;
 
 uniform sampler2D u_strokeTex;
@@ -141,12 +143,12 @@ float fieldFromP(vec2 p) {
     if (i >= u_tapCount) break;
     vec3 tap = u_taps[i];
     float age = (u_time - tap.z) * 0.001;
-    if (age < 0.0 || age > 3.0) continue;
+    if (age < 0.0 || age > TAP_LIFE) continue;
     vec2 tp = vec2(tap.x - 0.5 * res.x, 0.5 * res.y - tap.y) / res.y;
     float d = length(p - tp);
     float r = age * 0.6;
     float ring = exp(-pow((d - r) * 8.0, 2.0));
-    f += ring * (1.0 - age / 3.0) * 0.5;
+    f += ring * (1.0 - age / TAP_LIFE) * 0.5;
   }
 
   // ストローク（生の位置 + 万華鏡対称のエコー）→ 値場を盛り上げる
@@ -272,14 +274,14 @@ void main() {
     if (i >= u_tapCount) break;
     vec3 tap = u_taps[i];
     float age = (u_time - tap.z) * 0.001;
-    if (age < 0.0 || age > 3.0) continue;
+    if (age < 0.0 || age > TAP_LIFE) continue;
     vec2 tp = vec2(tap.x - 0.5 * res.x, 0.5 * res.y - tap.y) / res.y;
     vec2 d = p - tp;
     float dl = length(d);
     float al = atan(d.y, d.x);
     float grow = smoothstep(0.0, 0.35, age);          // 開花
-    float fade = 1.0 - smoothstep(1.8, 3.0, age);     // 溶ける
-    float sz = 0.02 + age * 0.05;
+    float fade = 1.0 - smoothstep(2.0, 3.5, age);     // 花は先に溶ける（色は後まで残る）
+    float sz = 0.02 + min(age, 2.5) * 0.05;           // 大きくなりすぎないよう頭打ち
     float rr = sz * (0.62 + 0.38 * cos(al * 8.0 + age * 1.5)); // 蓮弁の縁
     float petal = 1.0 - smoothstep(0.0, lw * 1.6, abs(dl - rr) * res.y);
     float ctr = 1.0 - smoothstep(sz * 0.16, sz * 0.22, dl);    // 花芯
@@ -298,6 +300,29 @@ void main() {
   float segG = TAU / u_segments;
   float angG = abs(mod(a, segG) - segG * 0.5) + t2 * 0.008;
   vec2 fpG = vec2(cos(angG), sin(angG)) * rad;
+
+  // タッチで構成要素を着彩：タップした部分（折りたたみ後の位置）に当たる
+  // 万華鏡対称のセルがすべて同じ色に染まり、寿命とともにゆっくり退色する。
+  vec3 paintCol = vec3(0.0);
+  float paintA = 0.0;
+  for (int i = 0; i < MAX_TAPS; i++) {
+    if (i >= u_tapCount) break;
+    vec3 tap = u_taps[i];
+    float age = (u_time - tap.z) * 0.001;
+    if (age < 0.0 || age > TAP_LIFE) continue;
+    vec2 tp = vec2(tap.x - 0.5 * res.x, 0.5 * res.y - tap.y) / res.y;
+    float ta = atan(tp.y, tp.x);
+    float tr = length(tp);
+    float tang = abs(mod(ta, segG) - segG * 0.5) + t2 * 0.008; // タップ点も同じ折りたたみへ
+    vec2 ftp = vec2(cos(tang), sin(tang)) * tr;
+    float dd = distance(fpG, ftp);                 // 折りたたみ空間での距離
+    float fall = 1.0 - smoothstep(0.07, 0.15, dd); // セル状の柔らかい広がり
+    float grow = smoothstep(0.0, 0.25, age);       // さっと染まる
+    float life = 1.0 - age / TAP_LIFE;             // やがて退色
+    float aa = fall * grow * life;
+    if (aa > paintA) { paintA = aa; paintCol = u_tapColor[i]; } // 最も濃い色を採用
+  }
+
   vec2 sgRaw = vec2(p.x * res.y / res.x + 0.5, p.y + 0.5);  sgRaw.y = 1.0 - sgRaw.y;
   vec2 sgFold = vec2(fpG.x * res.y / res.x + 0.5, fpG.y + 0.5); sgFold.y = 1.0 - sgFold.y;
   float strokeGlow = max(texture2D(u_strokeTex, sgRaw).r, texture2D(u_strokeTex, sgFold).r);
@@ -313,6 +338,7 @@ void main() {
   float v = clamp(ink2, 0.0, 1.0);
 
   vec3 base = u_paper;
+  base = mix(base, paintCol, paintA * 0.85); // タッチした構成要素を着彩（退色する）
   vec3 col = mix(base, u_ink, v);
   col += (u_ink - base) * glow * (1.0 - v); // 地の側を線色へ持ち上げて発光に
   gl_FragColor = vec4(col, 1.0);

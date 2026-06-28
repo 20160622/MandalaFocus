@@ -1,7 +1,7 @@
 // タップの波紋(bloom)管理 と ストローク描画バッファ(p5.Graphics)
 
 const MAX_TAPS = 16;     // シェーダーに渡せる波紋の最大数（frag 側の配列長と一致させる）
-const TAP_LIFETIME = 3000; // 波紋の寿命(ms)
+const TAP_LIFETIME = 5000; // 波紋・開花・着彩の寿命(ms)。frag 側 TAP_LIFE と揃える
 
 let strokeLayer;         // ユーザーのストロークを貯める 2D バッファ（テクスチャとして渡す）
 let taps = [];           // {x, y, t} の配列（x,y はピクセル座標, t は millis）
@@ -44,9 +44,28 @@ function clearStrokes() {
   strokeLayer.clear();
 }
 
-// 波紋を追加（古いものは上限で押し出す）
+// HSL(0..1) → RGB(0..1)
+function hslToRgb(h, s, l) {
+  if (s === 0) return [l, l, l];
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const conv = (t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+  };
+  return [conv(h + 1 / 3), conv(h), conv(h - 1 / 3)];
+}
+
+// 波紋を追加（古いものは上限で押し出す）。タップ位置から色相を決めて着彩色を持たせる。
 function addTap(x, y) {
-  taps.push({ x: x, y: y, t: millis() });
+  const ang = Math.atan2(y - height / 2, x - width / 2);
+  const hue = (ang / (Math.PI * 2)) + 0.5 + (millis() * 0.00003); // 位置＋ゆるやかな時間で色相
+  const col = hslToRgb(((hue % 1) + 1) % 1, 0.62, 0.55);          // 上品で鮮やかな色
+  taps.push({ x: x, y: y, t: millis(), col: col });
   if (taps.length > MAX_TAPS) taps.shift();
 }
 
@@ -63,6 +82,18 @@ function tapsToUniform() {
     arr[i * 3 + 0] = taps[i].x;
     arr[i * 3 + 1] = taps[i].y;
     arr[i * 3 + 2] = taps[i].t;
+  }
+  return arr;
+}
+
+// タップごとの着彩色を [r, g, b, ...] のフラット配列に（長さ MAX_TAPS*3）
+function tapColsToUniform() {
+  const arr = new Array(MAX_TAPS * 3).fill(0);
+  for (let i = 0; i < taps.length && i < MAX_TAPS; i++) {
+    const c = taps[i].col || [1, 1, 1];
+    arr[i * 3 + 0] = c[0];
+    arr[i * 3 + 1] = c[1];
+    arr[i * 3 + 2] = c[2];
   }
   return arr;
 }

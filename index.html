@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MandalaFocus</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- p5.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+</head>
+<body>
+  <!-- 上部HUD：進化の階梯 -->
+  <div id="hud">
+    <span id="hud-stage">階梯: 種</span>
+    <div id="hud-progress" title="次の開放まで"><div id="hud-bar"></div></div>
+    <span id="hud-light">光 0</span>
+    <span id="hud-collection">◉ 1/6</span>
+  </div>
+
+  <!-- 開放などの通知 -->
+  <div id="toast"></div>
+
+  <!-- 禅モードの操作ヒント（禅モード中も表示される） -->
+  <div id="zenhint">長押し ／ Esc で戻る</div>
+
+  <!-- 下部UIバー -->
+  <div id="ui">
+    <button id="btn-palette" title="階調（トーン）を切り替え (P)">◑ Tone</button>
+    <button id="btn-pattern" title="モチーフを切り替え（開放済みのみ） (M)">❖ Motif</button>
+    <button id="btn-shuffle" title="模様を一新 (Space)">⟳ Shuffle</button>
+    <button id="btn-clear" title="描いた線を消す (C)">⌫ Clear</button>
+    <button id="btn-zen" title="集中モード：UIを隠して絵だけに (Z／長押しで戻る)">🧘 禅</button>
+    <button id="btn-focus" title="集中タイマー：3→5→10分→オフ (F)">⏱ 集中</button>
+    <button id="btn-sound" title="静かな音のオン/オフ (S)">🔕 音</button>
+    <button id="btn-soundtype" title="背景音の種類を切替（和音・荘厳・豊麗・温和・風）">🎵 音色</button>
+    <button id="btn-fullscreen" title="全画面表示の切り替え">⛶ 全画面</button>
+    <button id="btn-share" title="今の曼荼羅をコードで共有">⤴ Share</button>
+    <button id="btn-load" title="共有コードを読み込む">📥 Load</button>
+    <span id="hint">タップ＝波紋／ドラッグ＝描く（光がたまり進化します）</span>
+  </div>
+
+  <!-- スケッチ本体 -->
+  <script src="src/palettes.js?v=11"></script>
+  <script src="src/progression.js?v=11"></script>
+  <script src="src/interaction.js?v=11"></script>
+  <script src="src/audio.js?v=11"></script>
+  <script src="src/main.js?v=11"></script>
+</body>
+</html>

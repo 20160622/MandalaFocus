@@ -316,10 +316,15 @@ void main() {
     float tang = abs(mod(ta, segG) - segG * 0.5) + t2 * 0.008; // タップ点も同じ折りたたみへ
     vec2 ftp = vec2(cos(tang), sin(tang)) * tr;
     float dd = distance(fpG, ftp);                 // 折りたたみ空間での距離
-    float fall = 1.0 - smoothstep(0.07, 0.15, dd); // セル状の柔らかい広がり
+    float fall = 1.0 - smoothstep(0.09, 0.17, dd); // この近傍だけに限定
+    if (fall <= 0.0) continue;
+    // タップした等高線セル（＝触れた構成要素）と同じレベルの面だけを塗る。
+    // これで線の内側にきっちり収まり、細かい要素を塗り分けられる。
+    float fcTap = fieldFromP(tp);
+    float bandMatch = step(abs(floor(fc * spacing) - floor(fcTap * spacing)), 0.5);
     float grow = smoothstep(0.0, 0.25, age);       // さっと染まる
     float life = 1.0 - age / TAP_LIFE;             // やがて退色
-    float aa = fall * grow * life;
+    float aa = fall * grow * life * bandMatch;
     if (aa > paintA) { paintA = aa; paintCol = u_tapColor[i]; } // 最も濃い色を採用
   }
 

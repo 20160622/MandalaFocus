@@ -269,28 +269,6 @@ void main() {
     ink = max(ink, max(dot, halo));
   }
 
-  // タップが咲く：各タップ点から蓮華が開いて溶ける（光の粒つき）
-  for (int i = 0; i < MAX_TAPS; i++) {
-    if (i >= u_tapCount) break;
-    vec3 tap = u_taps[i];
-    float age = (u_time - tap.z) * 0.001;
-    if (age < 0.0 || age > TAP_LIFE) continue;
-    vec2 tp = vec2(tap.x - 0.5 * res.x, 0.5 * res.y - tap.y) / res.y;
-    vec2 d = p - tp;
-    float dl = length(d);
-    float al = atan(d.y, d.x);
-    float grow = smoothstep(0.0, 0.35, age);          // 開花
-    float fade = 1.0 - smoothstep(2.0, 3.5, age);     // 花は先に溶ける（色は後まで残る）
-    float sz = 0.02 + min(age, 2.5) * 0.05;           // 大きくなりすぎないよう頭打ち
-    float rr = sz * (0.62 + 0.38 * cos(al * 8.0 + age * 1.5)); // 蓮弁の縁
-    float petal = 1.0 - smoothstep(0.0, lw * 1.6, abs(dl - rr) * res.y);
-    float ctr = 1.0 - smoothstep(sz * 0.16, sz * 0.22, dl);    // 花芯
-    float spk = (1.0 - smoothstep(0.0, lw * 1.4, abs(dl - sz * 1.7) * res.y))
-                * (0.5 + 0.5 * cos(al * 16.0));               // 光の粒
-    float bloom = max(max(petal, ctr), spk * 0.6) * grow * fade;
-    ink = max(ink, bloom);
-  }
-
   // 縁に近い線をフェードして枠の途切れを和らげる
   ink *= smoothstep(1.45, 1.15, rad);
 

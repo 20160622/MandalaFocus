@@ -16,19 +16,17 @@ canvas {
   display: block;
 }
 
+/* 隅のメニュー：普段は ≡ ボタンだけ、開くとパネルが立ち上がる */
 #ui {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  right: 14px;
+  bottom: 14px;
   z-index: 10;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  box-sizing: border-box;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
-  pointer-events: none; /* バー余白はキャンバスに通す。ボタンだけ拾う */
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none; /* 余白はキャンバスに通す。ボタン/パネルだけ拾う */
 }
 
 #ui button {
@@ -54,11 +52,62 @@ canvas {
   transform: scale(0.95);
 }
 
-#hint {
-  pointer-events: none;
-  margin-left: auto;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
+#btn-menu {
+  align-self: flex-end;
+}
+
+#btn-menu.active {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* 開閉パネル */
+#menu-panel {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(80vw, 320px);
+  max-height: 62vh;
+  overflow-y: auto;
+  padding: 14px;
+  box-sizing: border-box;
+  border-radius: 16px;
+  background: rgba(15, 15, 18, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.98);
+  transform-origin: bottom right;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+#menu-panel.open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.menu-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.menu-label {
+  width: 100%;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.menu-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 /* ---- 上部HUD：進化の階梯 ---- */
@@ -161,7 +210,6 @@ body.zen #toast {
 #zenhint.show { opacity: 1; }
 
 @media (max-width: 640px) {
-  #hint { display: none; }
-  #ui button { font-size: 13px; padding: 8px 12px; }
+  #ui button { font-size: 13px; padding: 9px 12px; }
   #hud-progress { flex-basis: 120px; }
 }

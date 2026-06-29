@@ -56,8 +56,10 @@ canvas {
   align-self: flex-end;
 }
 
-#btn-menu.active {
-  background: rgba(255, 255, 255, 0.22);
+#btn-menu.active,
+#ui button.active {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.55);
 }
 
 /* 開閉パネル */

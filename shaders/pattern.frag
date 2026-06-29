@@ -26,6 +26,7 @@ uniform vec3  u_ink;         // 線の色
 uniform float u_calm;        // 動きの静けさ(0=通常, 1=禅モードで最も静か)
 uniform float u_focus;       // 集中の経過(0..1)：荘厳さがゆっくり高まる
 uniform float u_flow;        // 没入の連鎖(0..1)：発光・華やかさ・光が増す
+uniform float u_paintHold;   // 塗り続けるモード(0=退色する, 1=色が消えない)
 
 uniform float u_mandala;     // 曼荼羅成分の強さ(0=フラクタル, 1=曼荼羅)
 uniform float u_petals;      // 蓮弁の数
@@ -288,7 +289,8 @@ void main() {
     if (i >= u_tapCount) break;
     vec3 tap = u_taps[i];
     float age = (u_time - tap.z) * 0.001;
-    if (age < 0.0 || age > PAINT_LIFE) continue;
+    // 通常は寿命で切る。塗り続けるモードでは退色させず常に有効。
+    if (age < 0.0 || (u_paintHold < 0.5 && age > PAINT_LIFE)) continue;
     vec2 tp = vec2(tap.x - 0.5 * res.x, 0.5 * res.y - tap.y) / res.y;
     float ta = atan(tp.y, tp.x);
     float tr = length(tp);
@@ -302,7 +304,8 @@ void main() {
     float fcTap = fieldFromP(tp);
     float bandMatch = step(abs(floor(fc * spacing) - floor(fcTap * spacing)), 0.5);
     float grow = smoothstep(0.0, 0.25, age);                       // さっと染まる
-    float life = 1.0 - smoothstep(PAINT_LIFE * 0.55, PAINT_LIFE, age); // 長く残して後半で退色
+    // 長く残して後半で退色。塗り続けるモードでは退色を打ち消す（常に 1.0）。
+    float life = mix(1.0 - smoothstep(PAINT_LIFE * 0.55, PAINT_LIFE, age), 1.0, u_paintHold);
     float aa = fall * grow * life * bandMatch;
     if (aa > paintA) { paintA = aa; paintCol = u_tapColor[i]; } // 最も濃い色を採用
   }

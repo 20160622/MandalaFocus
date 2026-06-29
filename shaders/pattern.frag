@@ -63,7 +63,7 @@ float noise(vec2 p) {
 float fbm(vec2 p) {
   float v = 0.0;
   float amp = 0.5;
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 5; i++) {   // 階層を 1 段増やして細部を出す
     v += amp * noise(p);
     p *= 2.0;
     amp *= 0.5;
@@ -76,7 +76,7 @@ float turbulence(vec2 p) {
   float v = 0.0;
   float amp = 0.5;
   float freq = 1.0;
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 6; i++) {   // 尾根状フラクタルも 1 段深く
     float n = noise(p * freq);
     n = abs(2.0 * n - 1.0);
     v += amp * n;
@@ -122,7 +122,7 @@ float fieldFromP(vec2 p) {
     fract(sin(u_seed * 12.9898) * 43758.5453),
     fract(sin(u_seed * 78.2330) * 43758.5453)
   ) * 50.0;
-  vec2 q = fp * 3.0 + seedOffset;
+  vec2 q = fp * 4.0 + seedOffset;  // 基本周波数を上げて模様を細かく
   vec2 w = vec2(
     fbm(q + vec2(0.0, t * 0.05)),
     fbm(q + vec2(5.2, 1.3 - t * 0.04))
@@ -135,7 +135,8 @@ float fieldFromP(vec2 p) {
   float ma = araw + t * 0.006;     // ごくゆっくり回転
   float scallop = u_petalDepth * (
       cos(ma * u_petals)       * (1.0 - smoothstep(0.15, 0.55, rad))  // 内側：基本の弁
-    + cos(ma * u_petals * 2.0) * smoothstep(0.25, 0.60, rad)          // 外側：倍の弁（層）
+    + cos(ma * u_petals * 2.0) * smoothstep(0.25, 0.60, rad)          // 中間：倍の弁（層）
+    + cos(ma * u_petals * 4.0) * smoothstep(0.45, 0.78, rad) * 0.55   // 外側：さらに細かい弁（層）
   );
   float fm = rad - scallop;        // 等高線が蓮弁状の同心リングになる
   f = mix(f, fm, u_mandala);
@@ -224,10 +225,19 @@ void main() {
   if (u_palace > 0.5) {
     float c1 = 1.0 - smoothstep(0.0, lw, abs(rad - 0.38) * res.y);
     float c2 = 1.0 - smoothstep(0.0, lw, abs(rad - 0.42) * res.y);
-    ink = max(ink, max(c1, c2));
+    // 内側にも円相を足して層を増やす
+    float c0 = 1.0 - smoothstep(0.0, lw, abs(rad - 0.30) * res.y);
+    float c3 = 1.0 - smoothstep(0.0, lw, abs(rad - 0.33) * res.y);
+    ink = max(ink, max(max(c0, c3), max(c1, c2)));
 
-    // 外周の蓮弁輪（波打つ細線）
-    float petR = 0.455 + 0.012 * cos(a * 32.0);
+    // 内周の細かな蓮弁輪（二重円相の間に小弁を巡らせる）
+    float inR = 0.355 + 0.008 * cos(a * 48.0);
+    float inLine = 1.0 - smoothstep(0.0, lw, abs(rad - inR) * res.y);
+    inLine *= smoothstep(0.33, 0.35, rad) * smoothstep(0.38, 0.36, rad);
+    ink = max(ink, inLine);
+
+    // 外周の蓮弁輪（より細かい弁に）
+    float petR = 0.455 + 0.010 * cos(a * 48.0);
     float petLine = 1.0 - smoothstep(0.0, lw, abs(rad - petR) * res.y);
     petLine *= smoothstep(0.42, 0.44, rad);
     ink = max(ink, petLine);

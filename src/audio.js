@@ -10,13 +10,12 @@ let _master = null;
 let _drone = null;        // { g, stoppers[] }
 let _audioOn = false;
 
-// 背景音（ドローン）の種類。harm=倍音の和音, noise=環境音（風）。
+// 背景音（ドローン）の種類。harm=倍音の和音。
 const DRONE_PRESETS = [
   { name: '和音', type: 'harm', base: 196.0,  ratios: [1, 1.5, 2],     gains: [0.5, 0.32, 0.22],        lp: 1400, lfo: 1 / 14, vol: 0.16 },
   { name: '荘厳', type: 'harm', base: 98.0,   ratios: [1, 2, 3],       gains: [0.55, 0.30, 0.16],       lp: 780,  lfo: 1 / 18, vol: 0.18 },
   { name: '豊麗', type: 'harm', base: 130.81, ratios: [1, 2, 3, 4, 5], gains: [0.5, 0.28, 0.18, 0.1, 0.06], lp: 2200, lfo: 1 / 12, vol: 0.14 },
   { name: '温和', type: 'harm', base: 174.61, ratios: [1, 1.25, 1.5, 2], gains: [0.45, 0.30, 0.28, 0.20], lp: 1600, lfo: 1 / 15, vol: 0.15 },
-  { name: '風',   type: 'noise', lp: 600,  lfo: 1 / 20, vol: 0.5 },
 ];
 let _droneIdx = 0;
 

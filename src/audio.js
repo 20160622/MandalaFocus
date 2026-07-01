@@ -17,7 +17,7 @@ const DRONE_PRESETS = [
   { name: '豊麗', type: 'harm', base: 130.81, ratios: [1, 2, 3, 4, 5], gains: [0.5, 0.28, 0.18, 0.1, 0.06], lp: 2200, lfo: 1 / 12, vol: 0.14 },
   { name: '温和', type: 'harm', base: 174.61, ratios: [1, 1.25, 1.5, 2], gains: [0.45, 0.30, 0.28, 0.20], lp: 1600, lfo: 1 / 15, vol: 0.15 },
   { name: '泉',   type: 'harm', base: 146.83, ratios: [1, 1.5, 2, 2.5, 3],    gains: [0.5, 0.34, 0.22, 0.12, 0.08],  lp: 1900, lfo: 1 / 16, vol: 0.15 },
-  { name: '星屑', type: 'harm', base: 261.63, ratios: [1, 2, 3, 4, 5],        gains: [0.42, 0.13, 0.10, 0.06, 0.05], lp: 2600, lfo: 1 / 11, vol: 0.12 },
+  { name: '雨',   type: 'noise', tone: 'rain', hp: 420, lp: 6500, lfo: 1 / 9, vol: 0.28 },
 ];
 let _droneIdx = 0;
 
@@ -35,16 +35,48 @@ function _audioEnsure() {
   comp.connect(_actx.destination);
 }
 
-// 2秒ループのブラウン系ノイズ（風のような環境音用）
-function _makeNoise() {
+// 2秒ループの環境ノイズ。rain=true で雨向け（明るい地の音＋雨だれの粒を焼き込む）。
+function _makeNoise(rain) {
   const len = _actx.sampleRate * 2;
   const buf = _actx.createBuffer(1, len, _actx.sampleRate);
   const data = buf.getChannelData(0);
-  let last = 0;
+
+  if (!rain) {
+    // ブラウン系（低域寄り）ノイズ
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.02 * w) / 1.02;
+      data[i] = last * 3.0;
+    }
+    return buf;
+  }
+
+  // 雨の地の音：高域を残したピンクノイズ（さーっという定常音）
+  let b0 = 0, b1 = 0, b2 = 0;
   for (let i = 0; i < len; i++) {
     const w = Math.random() * 2 - 1;
-    last = (last + 0.02 * w) / 1.02; // 低域寄りのノイズに
-    data[i] = last * 3.0;
+    b0 = 0.99765 * b0 + w * 0.0990460;
+    b1 = 0.96300 * b1 + w * 0.2965164;
+    b2 = 0.57000 * b2 + w * 1.0526913;
+    data[i] = (b0 + b1 + b2 + w * 0.1848) * 0.16; // 地は控えめ
+  }
+
+  // 雨だれの粒：短く減衰するノイズの粒を多数散らす（粒が多く反復は目立たない）
+  const drops = 220;
+  for (let d = 0; d < drops; d++) {
+    const pos = (Math.random() * len) | 0;
+    const dur = (_actx.sampleRate * (0.003 + Math.random() * 0.012)) | 0; // 3〜15ms
+    const amp = 0.25 + Math.random() * 0.55;
+    for (let j = 0; j < dur && pos + j < len; j++) {
+      const env = Math.exp(-j / (dur * 0.3));
+      data[pos + j] += (Math.random() * 2 - 1) * amp * env;
+    }
+  }
+
+  // クリップ防止
+  for (let i = 0; i < len; i++) {
+    if (data[i] > 1) data[i] = 1; else if (data[i] < -1) data[i] = -1;
   }
   return buf;
 }
@@ -66,26 +98,21 @@ function _droneStart() {
   const stoppers = [];
 
   if (pre.type === 'noise') {
-    // 環境音（風）：ノイズをローパスし、ゆっくり開閉して呼吸させる
+    // 雨音：明るめのノイズ＋雨だれの粒。低い唸りはハイパスで除き、高域はローパス(pre.lp)で整える。
     const src = _actx.createBufferSource();
-    src.buffer = _makeNoise();
+    src.buffer = _makeNoise(pre.tone === 'rain');
     src.loop = true;
+    const hp = _actx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = pre.hp || 400;
+    hp.Q.value = 0.4;
     const ng = _actx.createGain();
     ng.gain.value = 0.8;
-    src.connect(ng);
+    src.connect(hp);
+    hp.connect(ng);
     ng.connect(g);
     src.start();
     stoppers.push(src);
-
-    const sweep = _actx.createOscillator();
-    sweep.type = 'sine';
-    sweep.frequency.value = pre.lfo;
-    const sweepG = _actx.createGain();
-    sweepG.gain.value = pre.lp * 0.45;
-    sweep.connect(sweepG);
-    sweepG.connect(lp.frequency);
-    sweep.start();
-    stoppers.push(sweep);
   } else {
     // 倍音の和音：基音＋倍音をサイン波で重ねる
     pre.ratios.forEach((r, i) => {

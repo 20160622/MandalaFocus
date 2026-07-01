@@ -17,7 +17,7 @@ const DRONE_PRESETS = [
   { name: '豊麗', type: 'harm', base: 130.81, ratios: [1, 2, 3, 4, 5], gains: [0.5, 0.28, 0.18, 0.1, 0.06], lp: 2200, lfo: 1 / 12, vol: 0.14 },
   { name: '温和', type: 'harm', base: 174.61, ratios: [1, 1.25, 1.5, 2], gains: [0.45, 0.30, 0.28, 0.20], lp: 1600, lfo: 1 / 15, vol: 0.15 },
   { name: '泉',   type: 'harm', base: 146.83, ratios: [1, 1.5, 2, 2.5, 3],    gains: [0.5, 0.34, 0.22, 0.12, 0.08],  lp: 1900, lfo: 1 / 16, vol: 0.15 },
-  { name: '雨',   type: 'noise', tone: 'rain', hp: 420, lp: 6500, lfo: 1 / 9, vol: 0.28 },
+  { name: '雨',   type: 'noise', tone: 'rain', hp: 350, lp: 4200, lfo: 1 / 9, vol: 0.18 },
 ];
 let _droneIdx = 0;
 
@@ -62,12 +62,12 @@ function _makeNoise(rain) {
     data[i] = (b0 + b1 + b2 + w * 0.1848) * 0.16; // 地は控えめ
   }
 
-  // 雨だれの粒：短く減衰するノイズの粒を多数散らす（粒が多く反復は目立たない）
-  const drops = 220;
+  // 雨だれの粒：短く減衰するノイズの粒を控えめに散らす（さーっとした地の音を主役に）
+  const drops = 60;
   for (let d = 0; d < drops; d++) {
     const pos = (Math.random() * len) | 0;
     const dur = (_actx.sampleRate * (0.003 + Math.random() * 0.012)) | 0; // 3〜15ms
-    const amp = 0.25 + Math.random() * 0.55;
+    const amp = 0.12 + Math.random() * 0.22;
     for (let j = 0; j < dur && pos + j < len; j++) {
       const env = Math.exp(-j / (dur * 0.3));
       data[pos + j] += (Math.random() * 2 - 1) * amp * env;

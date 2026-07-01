@@ -16,6 +16,8 @@ const DRONE_PRESETS = [
   { name: '荘厳', type: 'harm', base: 98.0,   ratios: [1, 2, 3],       gains: [0.55, 0.30, 0.16],       lp: 780,  lfo: 1 / 18, vol: 0.18 },
   { name: '豊麗', type: 'harm', base: 130.81, ratios: [1, 2, 3, 4, 5], gains: [0.5, 0.28, 0.18, 0.1, 0.06], lp: 2200, lfo: 1 / 12, vol: 0.14 },
   { name: '温和', type: 'harm', base: 174.61, ratios: [1, 1.25, 1.5, 2], gains: [0.45, 0.30, 0.28, 0.20], lp: 1600, lfo: 1 / 15, vol: 0.15 },
+  { name: '泉',   type: 'harm', base: 146.83, ratios: [1, 1.5, 2, 2.5, 3],    gains: [0.5, 0.34, 0.22, 0.12, 0.08],  lp: 1900, lfo: 1 / 16, vol: 0.15 },
+  { name: '星屑', type: 'harm', base: 261.63, ratios: [1, 2, 3, 4, 5],        gains: [0.42, 0.13, 0.10, 0.06, 0.05], lp: 2600, lfo: 1 / 11, vol: 0.12 },
 ];
 let _droneIdx = 0;
 

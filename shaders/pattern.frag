@@ -37,6 +37,7 @@ uniform float u_rays;        // 放射光背(0/1)
 uniform float u_palace;      // 曼荼羅建築：二重円相・四門・蓮弁輪(0/1)
 uniform float u_flame;       // 火焔光背(0/1)
 uniform float u_jewel;       // 中央の宝珠(0/1)
+uniform float u_cosmos;      // 虚空（星曼荼羅：天球環＋星＋子午線）(0/1)
 
 uniform vec3  u_taps[MAX_TAPS]; // x, y(ピクセル), t(millis)
 uniform vec3  u_tapColor[MAX_TAPS]; // タップごとの着彩色(rgb)
@@ -279,6 +280,39 @@ void main() {
     float dot = 1.0 - smoothstep(0.016, 0.022, rad);
     float halo = 1.0 - smoothstep(0.0, lw, abs(rad - 0.05) * res.y);
     ink = max(ink, max(dot, halo));
+  }
+
+  // 虚空（星曼荼羅）：同心の天球環＋星の点＋放射する子午線＋中央の光芯
+  if (u_cosmos > 0.5) {
+    float aa = a + u_time * 0.00002;   // ごくゆっくり巡る天
+
+    // 放射する子午線（宇宙の経線）：細く多数、中心近くと外周で消える
+    float meridN = 48.0;
+    float mer = 0.5 + 0.5 * cos(aa * meridN);
+    mer = smoothstep(0.90, 1.0, mer);
+    mer *= smoothstep(0.10, 0.16, rad) * smoothstep(0.50, 0.40, rad);
+    ink = max(ink, mer * 0.42);
+
+    // 同心の天球環 と その上に散る星（環×星筋の交点にきらめく点）
+    float starN = 24.0;
+    float ad = abs(fract(aa / (TAU / starN) + 0.5) - 0.5) * (TAU / starN); // 最寄り星筋への角度差
+    float arcPx = ad * rad * res.y;
+    float ringsInk = 0.0;
+    float starInk = 0.0;
+    for (int k = 1; k <= 5; k++) {
+      float rr = 0.06 + float(k) * 0.08;                        // 0.14,0.22,0.30,0.38,0.46
+      ringsInk = max(ringsInk, 1.0 - smoothstep(0.0, lw, abs(rad - rr) * res.y));
+      float onRing = 1.0 - smoothstep(0.0, lw * 2.2, abs(rad - rr) * res.y);
+      float twinkle = 0.55 + 0.45 * noise(vec2(float(k) * 3.1, aa * 2.0 + t)); // ゆらめき
+      starInk = max(starInk, (1.0 - smoothstep(0.0, lw * 2.2, arcPx)) * onRing * twinkle);
+    }
+    ink = max(ink, ringsInk * 0.82);
+    ink = max(ink, starInk);
+
+    // 中央の光芯：多方向へ伸びる細い光条（宇宙の芯）
+    float cray = 0.5 + 0.5 * cos(aa * 16.0);
+    cray = smoothstep(0.5, 1.0, cray) * smoothstep(0.13, 0.0, rad);
+    ink = max(ink, cray * 0.65);
   }
 
   // 縁に近い線をフェードして枠の途切れを和らげる

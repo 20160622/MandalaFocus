@@ -29,17 +29,20 @@ const TONES = [
 //   palace    : 曼荼羅の建築（二重円相・四門・外周の蓮弁輪）（0/1）
 //   flame     : 火焔光背（外周の燃え立つ縁）（0/1）
 //   jewel     : 中央の宝珠（如意宝珠）（0/1）
+//   cosmos    : 虚空（星曼荼羅：天球環＋星＋放射子午線）（0/1）
 const MODES = [
   // 0 種：素のフラクタル万華鏡
-  { segments: 12, warp: 0.6, mandala: 0.0,  petals: 12, petalDepth: 0.05, spokes: 0,  core: 0, rays: 0, palace: 0, flame: 0, jewel: 0 },
+  { segments: 12, warp: 0.6, mandala: 0.0,  petals: 12, petalDepth: 0.05, spokes: 0,  core: 0, rays: 0, palace: 0, flame: 0, jewel: 0, cosmos: 0 },
   // 1 芽生え：うっすら蓮弁が立ち上がる
-  { segments: 16, warp: 0.4, mandala: 0.30, petals: 16, petalDepth: 0.05, spokes: 0,  core: 0, rays: 0, palace: 0, flame: 0, jewel: 0 },
+  { segments: 16, warp: 0.4, mandala: 0.30, petals: 16, petalDepth: 0.05, spokes: 0,  core: 0, rays: 0, palace: 0, flame: 0, jewel: 0, cosmos: 0 },
   // 2 蓮華：多重の蓮弁＋中央コア＋放射光背
-  { segments: 12, warp: 0.3, mandala: 0.85, petals: 12, petalDepth: 0.06, spokes: 0,  core: 1, rays: 1, palace: 0, flame: 0, jewel: 0 },
+  { segments: 12, warp: 0.3, mandala: 0.85, petals: 12, petalDepth: 0.06, spokes: 0,  core: 1, rays: 1, palace: 0, flame: 0, jewel: 0, cosmos: 0 },
   // 3 曼荼羅：二重円相・四門・外周蓮弁輪の荘厳
-  { segments: 16, warp: 0.3, mandala: 0.90, petals: 16, petalDepth: 0.05, spokes: 0,  core: 1, rays: 0, palace: 1, flame: 0, jewel: 0 },
-  // 4 法輪：輪宝＋火焔光背＋中央宝珠（最終形）
-  { segments: 12, warp: 0.3, mandala: 0.80, petals: 12, petalDepth: 0.05, spokes: 12, core: 0, rays: 0, palace: 0, flame: 1, jewel: 1 },
+  { segments: 16, warp: 0.3, mandala: 0.90, petals: 16, petalDepth: 0.05, spokes: 0,  core: 1, rays: 0, palace: 1, flame: 0, jewel: 0, cosmos: 0 },
+  // 4 法輪：輪宝＋火焔光背＋中央宝珠
+  { segments: 12, warp: 0.3, mandala: 0.80, petals: 12, petalDepth: 0.05, spokes: 12, core: 0, rays: 0, palace: 0, flame: 1, jewel: 1, cosmos: 0 },
   // 5 生長：有機的な曼荼羅
-  { segments: 24, warp: 0.5, mandala: 0.55, petals: 24, petalDepth: 0.04, spokes: 0,  core: 0, rays: 0, palace: 0, flame: 0, jewel: 0 },
+  { segments: 24, warp: 0.5, mandala: 0.55, petals: 24, petalDepth: 0.04, spokes: 0,  core: 0, rays: 0, palace: 0, flame: 0, jewel: 0, cosmos: 0 },
+  // 6 虚空：星曼荼羅（天球環＋星＋放射子午線＋中央宝珠）— 宇宙の真理（最終形）
+  { segments: 24, warp: 0.35, mandala: 0.65, petals: 24, petalDepth: 0.045, spokes: 0,  core: 0, rays: 0, palace: 0, flame: 0, jewel: 1, cosmos: 1 },
 ];

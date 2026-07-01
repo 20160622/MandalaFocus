@@ -13,6 +13,7 @@ const STAGES = [
   { light: 280,  mode: 2, title: '蓮華' },
   { light: 560,  mode: 3, title: '曼荼羅' },
   { light: 1000, mode: 4, title: '法輪' },
+  { light: 1600, mode: 6, title: '虚空(こくう)' },
 ];
 
 const progress = {

@@ -33,7 +33,7 @@ let flow = 0;              // 0..1。光・発光・対称の華やかさに反�
 let paintHold = false;
 
 function preload() {
-  patternShader = loadShader('shaders/pattern.vert?v=24', 'shaders/pattern.frag?v=24');
+  patternShader = loadShader('shaders/pattern.vert?v=29', 'shaders/pattern.frag?v=29');
 }
 
 function setup() {
@@ -105,6 +105,7 @@ function draw() {
   patternShader.setUniform('u_palace', mode.palace);
   patternShader.setUniform('u_flame', mode.flame);
   patternShader.setUniform('u_jewel', mode.jewel);
+  patternShader.setUniform('u_cosmos', mode.cosmos);
   patternShader.setUniform('u_spacing', tone.spacing);
   patternShader.setUniform('u_lineWidth', tone.lineWidth);
   patternShader.setUniform('u_fill', tone.fill);
